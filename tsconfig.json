@@ -8,7 +8,8 @@
     "skipLibCheck": true,
     "types": ["node"],
     "outDir": "./dist",
-    "rootDir": "."
+    "rootDir": ".",
+    "preserveSymlinks": true
   },
   "include": ["**/*.ts"],
   "exclude": ["node_modules", "dist", "my-app", "scaffold"]

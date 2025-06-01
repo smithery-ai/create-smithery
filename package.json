@@ -2,10 +2,13 @@
 	"name": "create-smithery",
 	"version": "1.0.2",
 	"description": "The CLI for creating MCP servers with Smithery",
-	"main": "index.js",
+	"main": "dist/index.js",
+	"bin": {
+		"create-smithery": "dist/index.js"
+	},
 	"type": "module",
 	"scripts": {
-		"build": "tsc",
+		"build": "tsc && chmod +x dist/index.js",
 		"start": "rm -rf my-app && pnpm build && node dist/index.js my-app"
 	},
 	"keywords": [],

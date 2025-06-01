@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { $, execa } from "execa";
 import inquirer from "inquirer";
 import { Command } from "commander";

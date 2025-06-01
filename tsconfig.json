@@ -11,5 +11,5 @@
     "rootDir": "."
   },
   "include": ["**/*.ts"],
-  "exclude": ["node_modules", "dist", "my-app"]
+  "exclude": ["node_modules", "dist", "my-app", "scaffold"]
 } 

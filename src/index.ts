@@ -57,8 +57,24 @@ async function load<T>(
 }
 
 await load("Cloning scaffold from GitHub...", "Scaffold cloned", async () => {
-  await $`git clone https://github.com/kamath/scaffold.git ${projectName}`;
+  // Clone the scaffold and only keep the scaffold directory
+  await $`git clone https://github.com/smithery-ai/create-smithery.git ${projectName}`;
+  const files = await $`ls -al ${projectName}`;
+  for (const file of files.stdout.split("\n")) {
+    const fileName = file.split(" ").pop();
+    if (
+      fileName &&
+      fileName !== "scaffold" &&
+      fileName !== "." &&
+      fileName !== ".."
+    ) {
+      await $`rm -rf ${projectName}/${fileName}`;
+    }
+  }
+  await $`cp -r ${projectName}/scaffold/. ${projectName}/`;
+  await $`rm -rf ${projectName}/scaffold`;
 });
+
 await load("Navigating to project...", "Project navigated", async () => {
   await $`cd ${projectName}`;
 });

@@ -8,8 +8,9 @@
 	},
 	"type": "module",
 	"scripts": {
+		"prepare": "npm run build",
 		"build": "tsc && chmod +x dist/index.js",
-		"start": "rm -rf my-app && pnpm build && node dist/index.js my-app"
+		"start": "rm -rf my-app && npm run build && node dist/index.js my-app"
 	},
 	"keywords": [],
 	"author": "",

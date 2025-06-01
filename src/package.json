@@ -1,0 +1,28 @@
+{
+	"name": "create-smithery",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"build": "tsc",
+		"start": "rm -rf my-app && pnpm build && node dist/index.js my-app"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@smithery/cli": "^1.2.4",
+		"@types/inquirer": "^9.0.8",
+		"@types/node": "^22.15.29",
+		"tsx": "^4.19.4",
+		"typescript": "^5.8.3"
+	},
+	"dependencies": {
+		"boxen": "^8.0.1",
+		"chalk": "^5.4.1",
+		"commander": "^14.0.0",
+		"execa": "^9.6.0",
+		"inquirer": "^12.6.3"
+	}
+}

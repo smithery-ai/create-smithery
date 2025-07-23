@@ -8,13 +8,26 @@ import chalk from "chalk";
 import { createWriteStream } from "fs";
 import { once } from "events";
 
+function detectPackageManager(): string {
+  const userAgent = process.env.npm_config_user_agent;
+  
+  if (userAgent) {
+    if (userAgent.startsWith('yarn')) return 'yarn';
+    if (userAgent.startsWith('pnpm')) return 'pnpm';
+    if (userAgent.startsWith('bun')) return 'bun';
+    if (userAgent.startsWith('npm')) return 'npm';
+  }
+  
+  return 'npm';
+}
+
 // Establish CLI args/flags
 const program = new Command();
 program.argument("[projectName]", "Name of the project").parse(process.argv);
-program.option("--package-manager", "Package manager to use", "npm");
+program.option("--package-manager", "Package manager to use");
 
 let [projectName] = program.args;
-let packageManager = program.opts().packageManager;
+let packageManager = program.opts().packageManager || detectPackageManager();
 
 // If no project name is provided, prompt the user for it
 if (!projectName) {

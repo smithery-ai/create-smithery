@@ -78,7 +78,7 @@ await load("Cloning scaffold from GitHub...", "Scaffold cloned", async () => {
 });
 
 await load("Navigating to project...", "Project navigated", async () => {
-  await $`cd ${projectName}`;
+  // await $`cd ${projectName}`; Not needed - we use cwd option instead
 });
 await $`rm -rf ${projectName}/.git`;
 await $`rm -rf ${projectName}/package-lock.json`;
@@ -91,17 +91,17 @@ await load("Installing dependencies...", "Dependencies installed", async () => {
 
 console.log(
   "\n\n\n" +
-    boxen(
-      `Welcome to your MCP server! To get started, run: ${chalk.rgb(
-        234,
-        88,
-        12
-      )(
-        `\n\ncd ${projectName} && ${packageManager} run dev`
-      )}\n\nTry saying something like 'Say hello to John' to execute your tool!`,
-      {
-        padding: 2,
-        textAlignment: "center",
-      }
-    )
+  boxen(
+    `Welcome to your MCP server! To get started, run: ${chalk.rgb(
+      234,
+      88,
+      12
+    )(
+      `\n\ncd ${projectName} && ${packageManager} run dev`
+    )}\n\nTry saying something like 'Say hello to John' to execute your tool!`,
+    {
+      padding: 2,
+      textAlignment: "center",
+    }
+  )
 );

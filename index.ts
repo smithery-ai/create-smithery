@@ -8,13 +8,26 @@ import chalk from "chalk";
 import { createWriteStream } from "fs";
 import { once } from "events";
 
+function detectPackageManager(): string {
+  const userAgent = process.env.npm_config_user_agent;
+  
+  if (userAgent) {
+    if (userAgent.startsWith('yarn')) return 'yarn';
+    if (userAgent.startsWith('pnpm')) return 'pnpm';
+    if (userAgent.startsWith('bun')) return 'bun';
+    if (userAgent.startsWith('npm')) return 'npm';
+  }
+  
+  return 'npm';
+}
+
 // Establish CLI args/flags
 const program = new Command();
 program.argument("[projectName]", "Name of the project").parse(process.argv);
-program.option("--package-manager", "Package manager to use", "npm");
+program.option("--package-manager", "Package manager to use");
 
 let [projectName] = program.args;
-let packageManager = program.opts().packageManager;
+let packageManager = program.opts().packageManager || detectPackageManager();
 
 // If no project name is provided, prompt the user for it
 if (!projectName) {
@@ -78,7 +91,7 @@ await load("Cloning scaffold from GitHub...", "Scaffold cloned", async () => {
 });
 
 await load("Navigating to project...", "Project navigated", async () => {
-  await $`cd ${projectName}`;
+  // await $`cd ${projectName}`; Not needed - we use cwd option instead
 });
 await $`rm -rf ${projectName}/.git`;
 await $`rm -rf ${projectName}/package-lock.json`;
@@ -91,17 +104,17 @@ await load("Installing dependencies...", "Dependencies installed", async () => {
 
 console.log(
   "\n\n\n" +
-    boxen(
-      `Welcome to your MCP server! To get started, run: ${chalk.rgb(
-        234,
-        88,
-        12
-      )(
-        `\n\ncd ${projectName} && ${packageManager} run dev`
-      )}\n\nTry saying something like 'Say hello to John' to execute your tool!`,
-      {
-        padding: 2,
-        textAlignment: "center",
-      }
-    )
+  boxen(
+    `Welcome to your MCP server! To get started, run: ${chalk.rgb(
+      234,
+      88,
+      12
+    )(
+      `\n\ncd ${projectName} && ${packageManager} run dev`
+    )}\n\nTry saying something like 'Say hello to John' to execute your tool!`,
+    {
+      padding: 2,
+      textAlignment: "center",
+    }
+  )
 );

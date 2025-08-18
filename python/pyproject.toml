@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "create-smithery-py"
+version = "0.0.1"
+authors = [
+  { name="Anirudh Kamath", email="anirudh@smithery.ai" },
+]
+description = "A simple package to create a smithery project"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "rich",
+    "click",
+    "questionary",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/smithery-ai/create-smithery"
+"Bug Tracker" = "https://github.com/smithery-ai/create-smithery/issues"
+
+[project.scripts]
+create-smithery = "create_smithery.__main__:main"

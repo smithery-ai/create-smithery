@@ -55,7 +55,7 @@ export default function createServer({
 		new ResourceTemplate("greeting://{name}", { list: undefined }),
 		{
 			title: "User Information",
-			description: "Information about user",
+			description: "Find information about user",
 		},
 		async (uri, { name }) => ({
 			contents: [

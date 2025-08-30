@@ -14,40 +14,84 @@
  * https://smithery.ai/docs/concepts/cli
  */
 
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
+import {
+	McpServer,
+	ResourceTemplate,
+} from "@modelcontextprotocol/sdk/server/mcp.js"
+import { z } from "zod"
 
 // Optional: If you have user-level config, define it here
 // This should map to the config in your smithery.yaml file
 export const configSchema = z.object({
-  debug: z.boolean().default(false).describe("Enable debug logging"),
-});
+	debug: z.boolean().default(false).describe("Enable debug logging"),
+})
 
-export default function createStatelessServer({
-  config,
-  sessionId,
+export default function createServer({
+	config,
 }: {
-  config: z.infer<typeof configSchema>; // Define your config in smithery.yaml
-  sessionId: string; // Use the sessionId field for mapping requests to stateful processes
+	config: z.infer<typeof configSchema> // Define your config in smithery.yaml
 }) {
-  const server = new McpServer({
-    name: "My MCP Server",
-    version: "1.0.0",
-  });
+	const server = new McpServer({
+		name: "My MCP Server",
+		version: "1.0.0",
+	})
 
-  // Add a tool
-  server.tool(
-    "hello",
-    "Say hello to someone",
-    {
-      name: z.string().describe("Name to greet"),
-    },
-    async ({ name }) => {
-      return {
-        content: [{ type: "text", text: `Hello, ${name}!` }],
-      };
-    }
-  );
+	// Add a tool
+	server.registerTool(
+		"hello",
+		{
+			title: "Hello Tool",
+			description: "Say hello to someone",
+			inputSchema: { name: z.string().describe("Name to greet") },
+		},
+		async ({ name }) => ({
+			content: [{ type: "text", text: `Hello, ${name}!` }],
+		}),
+	)
 
-  return server.server;
+	// Add a resource
+	server.registerResource(
+		"info",
+		new ResourceTemplate("greeting://{name}", { list: undefined }),
+		{
+			title: "User Information",
+			description: "Information about user",
+		},
+		async (uri, { name }) => ({
+			contents: [
+				{
+					uri: uri.href,
+					text: `${name} builds MCP servers`,
+					mimeType: "text/plain",
+				},
+			],
+		}),
+	)
+
+	// Add a prompt
+	server.registerPrompt(
+		"greet",
+		{
+			title: "Say Hello",
+			description: "Say hello to someone",
+			argsSchema: {
+				name: z.string().describe("Name of the person to greet"),
+			},
+		},
+		async ({ name }) => {
+			return {
+				messages: [
+					{
+						role: "user",
+						content: {
+							type: "text",
+							text: `Say hello to ${name}`,
+						},
+					},
+				],
+			}
+		},
+	)
+
+	return server.server
 }

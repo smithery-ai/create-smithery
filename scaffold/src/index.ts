@@ -54,7 +54,7 @@ export default function createServer({
 		"info",
 		new ResourceTemplate("greeting://{name}", { list: undefined }),
 		{
-			title: "User Information",
+			title: "User Resource",
 			description: "Find information about user",
 		},
 		async (uri, { name }) => ({
@@ -72,7 +72,7 @@ export default function createServer({
 	server.registerPrompt(
 		"greet",
 		{
-			title: "Say Hello",
+			title: "Hello Prompt",
 			description: "Say hello to someone",
 			argsSchema: {
 				name: z.string().describe("Name of the person to greet"),

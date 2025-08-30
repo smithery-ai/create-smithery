@@ -14,10 +14,7 @@
  * https://smithery.ai/docs/concepts/cli
  */
 
-import {
-	McpServer,
-	ResourceTemplate,
-} from "@modelcontextprotocol/sdk/server/mcp.js"
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js"
 import { z } from "zod"
 
 // Optional: If you have user-level config, define it here
@@ -32,7 +29,7 @@ export default function createServer({
 	config: z.infer<typeof configSchema> // Define your config in smithery.yaml
 }) {
 	const server = new McpServer({
-		name: "My MCP Server",
+		name: "Say Hello",
 		version: "1.0.0",
 	})
 
@@ -51,21 +48,17 @@ export default function createServer({
 
 	// Add a resource
 	server.registerResource(
-		"info",
-		new ResourceTemplate("user://{name}", {
-			list: async () => ({
-				resources: [{ name: "Henry", uri: "user://henry" }],
-			}),
-		}),
+		"hello-world-history",
+		"history://hello-world",
 		{
-			title: "User Resource",
-			description: "Find information about someone",
+			title: "Hello World History",
+			description: "The origin story of the famous 'Hello, World' program",
 		},
-		async (uri, { name }) => ({
+		async uri => ({
 			contents: [
 				{
 					uri: uri.href,
-					text: `${name} builds MCP servers`,
+					text: '"Hello, World" first appeared in a 1972 Bell Labs memo by Brian Kernighan and later became the iconic first program for beginners in countless languages.',
 					mimeType: "text/plain",
 				},
 			],

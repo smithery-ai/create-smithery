@@ -52,7 +52,11 @@ export default function createServer({
 	// Add a resource
 	server.registerResource(
 		"info",
-		new ResourceTemplate("user://{name}", { list: undefined }),
+		new ResourceTemplate("user://{name}", {
+			list: async () => ({
+				resources: [{ name: "Henry", uri: "user://henry" }],
+			}),
+		}),
 		{
 			title: "User Resource",
 			description: "Find information about someone",

@@ -10,12 +10,14 @@
 	"scripts": {
 		"prepare": "npm run build",
 		"build": "tsc && chmod +x dist/index.js",
-		"start": "rm -rf my-app && npm run build && node dist/index.js my-app"
+		"start": "rm -rf my-app && npm run build && node dist/index.js my-app",
+		"check": "npx @biomejs/biome check --write --unsafe"
 	},
 	"keywords": [],
 	"author": "",
 	"license": "ISC",
 	"devDependencies": {
+		"@biomejs/biome": "^2.0.6",
 		"@smithery/cli": "^1.2.4",
 		"@types/inquirer": "^9.0.8",
 		"@types/node": "^22.15.29",

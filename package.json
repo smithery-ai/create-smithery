@@ -9,8 +9,8 @@
 	"type": "module",
 	"scripts": {
 		"prepare": "npm run build",
-		"build": "tsc && chmod +x dist/index.js",
-		"start": "rm -rf my-app && npm run build && node dist/index.js my-app",
+		"build": "tsc && shx chmod +x dist/index.js",
+		"start": "shx rm -rf my-app && npm run build && node dist/index.js my-app",
 		"check": "npx @biomejs/biome check --write --unsafe"
 	},
 	"keywords": [],
@@ -21,6 +21,7 @@
 		"@smithery/cli": "^1.2.4",
 		"@types/inquirer": "^9.0.8",
 		"@types/node": "^22.15.29",
+		"shx": "^0.4.0",
 		"tsx": "^4.19.4",
 		"typescript": "^5.8.3"
 	},

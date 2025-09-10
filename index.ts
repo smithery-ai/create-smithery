@@ -72,7 +72,7 @@ async function load<T>(
 await load("Cloning scaffold from GitHub...", "Scaffold cloned", async () => {
 	// Clone the scaffold and only keep the scaffold directory
 	await $`git clone https://github.com/smithery-ai/create-smithery.git ${projectName}`
-	const files = await $`ls -al ${projectName}`
+	const files = await $`shx ls -al ${projectName}`
 	for (const file of files.stdout.split("\n")) {
 		const fileName = file.split(" ").pop()
 		if (
@@ -81,19 +81,19 @@ await load("Cloning scaffold from GitHub...", "Scaffold cloned", async () => {
 			fileName !== "." &&
 			fileName !== ".."
 		) {
-			await $`rm -rf ${projectName}/${fileName}`
+			await $`shx rm -rf ${projectName}/${fileName}`
 		}
 	}
-	await $`cp -r ${projectName}/scaffold/. ${projectName}/`
-	await $`rm -rf ${projectName}/scaffold`
+	await $`shx cp -r ${projectName}/scaffold/. ${projectName}/`
+	await $`shx rm -rf ${projectName}/scaffold`
 })
 
 await load("Navigating to project...", "Project navigated", async () => {
 	// await $`cd ${projectName}`; Not needed - we use cwd option instead
 })
-await $`rm -rf ${projectName}/.git`
-await $`rm -rf ${projectName}/package-lock.json`
-await $`rm -rf ${projectName}/node_modules`
+await $`shx rm -rf ${projectName}/.git`
+await $`shx rm -rf ${projectName}/package-lock.json`
+await $`shx rm -rf ${projectName}/node_modules`
 
 await load("Installing dependencies...", "Dependencies installed", async () => {
 	console.log("\n\n")

@@ -21,7 +21,6 @@
 		"@smithery/cli": "^1.2.4",
 		"@types/inquirer": "^9.0.8",
 		"@types/node": "^22.15.29",
-		"shx": "^0.4.0",
 		"tsx": "^4.19.4",
 		"typescript": "^5.8.3"
 	},
@@ -30,6 +29,7 @@
 		"chalk": "^5.4.1",
 		"commander": "^14.0.0",
 		"execa": "^9.6.0",
-		"inquirer": "^12.6.3"
+		"inquirer": "^12.6.3",
+		"shx": "^0.4.0"
 	}
 }

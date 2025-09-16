@@ -5,6 +5,7 @@ import inquirer from "inquirer"
 import { Command } from "commander"
 import boxen from "boxen"
 import chalk from "chalk"
+import figlet from "figlet"
 
 function detectPackageManager(): string {
 	const userAgent = process.env.npm_config_user_agent
@@ -65,7 +66,7 @@ async function load<T>(
 
 	const result = await command()
 	clearInterval(loadingInterval)
-	process.stdout.write(`\r\x1b[K[\u2713] ${endMsg}\n`)
+	process.stdout.write(`\r\x1b[K[${chalk.green("✓")}] ${endMsg}\n`)
 	return result
 }
 
@@ -96,23 +97,37 @@ await $`shx rm -rf ${projectName}/package-lock.json`
 await $`shx rm -rf ${projectName}/node_modules`
 
 await load("Installing dependencies...", "Dependencies installed", async () => {
-	console.log("\n\n")
-	await $({ cwd: projectName, stdio: "inherit" })`${packageManager} install`
+	await $({ cwd: projectName })`${packageManager} install`
 })
+
+await load(
+	"Initializing git repository...",
+	"Git repository initialized",
+	async () => {
+		await $({ cwd: projectName })`git init`
+	},
+)
+
+// Generate ASCII art for "Smithery" using figlet
+const asciiArt = figlet.textSync("Smithery", { font: "Sub-Zero" })
 
 console.log(
 	"\n\n\n" +
 		boxen(
-			`Welcome to your MCP server! To get started, run: ${chalk.rgb(
+			`${chalk.blue.bold(asciiArt)}\n\n${chalk.green.bold("* Welcome to your MCP server!")}\n\nTo get started, run:\n\n${chalk.rgb(
 				234,
 				88,
 				12,
 			)(
-				`\n\ncd ${projectName} && ${packageManager} run dev`,
-			)}\n\nTry saying something like 'Say hello to John' to execute your tool!`,
+				`cd ${projectName} && ${packageManager} run dev`,
+			)}\n\nTry saying something like ${chalk.cyan.bold("'Say hello to John'")},`,
 			{
 				padding: 2,
-				textAlignment: "center",
+				textAlignment: "left",
+				borderStyle: "round",
+				borderColor: "blue",
+				title: chalk.blue.bold("Smithery MCP Server"),
+				titleAlignment: "left",
 			},
 		),
 )

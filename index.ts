@@ -6,6 +6,8 @@ import { Command } from "commander"
 import boxen from "boxen"
 import chalk from "chalk"
 import figlet from "figlet"
+import fs from "fs/promises"
+import path from "path"
 
 function detectPackageManager(): string {
 	const userAgent = process.env.npm_config_user_agent
@@ -73,28 +75,46 @@ async function load<T>(
 await load("Cloning scaffold from GitHub...", "Scaffold cloned", async () => {
 	// Clone the scaffold and only keep the scaffold directory
 	await $`git clone https://github.com/smithery-ai/create-smithery.git ${projectName}`
-	const files = await $`shx ls -al ${projectName}`
-	for (const file of files.stdout.split("\n")) {
-		const fileName = file.split(" ").pop()
-		if (
-			fileName &&
-			fileName !== "scaffold" &&
-			fileName !== "." &&
-			fileName !== ".."
-		) {
-			await $`shx rm -rf ${projectName}/${fileName}`
+	
+	// Use native fs operations instead of shx
+	const files = await fs.readdir(projectName)
+	for (const fileName of files) {
+		if (fileName !== "scaffold" && fileName !== "." && fileName !== "..") {
+			const filePath = path.join(projectName, fileName)
+			const stats = await fs.stat(filePath)
+			if (stats.isDirectory()) {
+				await fs.rm(filePath, { recursive: true, force: true })
+			} else {
+				await fs.unlink(filePath)
+			}
 		}
 	}
-	await $`shx cp -r ${projectName}/scaffold/. ${projectName}/`
-	await $`shx rm -rf ${projectName}/scaffold`
+	
+	// Copy scaffold contents to project root
+	const scaffoldPath = path.join(projectName, "scaffold")
+	const scaffoldFiles = await fs.readdir(scaffoldPath)
+	for (const file of scaffoldFiles) {
+		const src = path.join(scaffoldPath, file)
+		const dest = path.join(projectName, file)
+		const stats = await fs.stat(src)
+		if (stats.isDirectory()) {
+			await fs.cp(src, dest, { recursive: true })
+		} else {
+			await fs.copyFile(src, dest)
+		}
+	}
+	
+	// Remove the scaffold directory
+	await fs.rm(scaffoldPath, { recursive: true, force: true })
 })
 
 await load("Navigating to project...", "Project navigated", async () => {
 	// await $`cd ${projectName}`; Not needed - we use cwd option instead
 })
-await $`shx rm -rf ${projectName}/.git`
-await $`shx rm -rf ${projectName}/package-lock.json`
-await $`shx rm -rf ${projectName}/node_modules`
+// Clean up unnecessary files using native fs operations
+await fs.rm(path.join(projectName, ".git"), { recursive: true, force: true }).catch(() => {})
+await fs.rm(path.join(projectName, "package-lock.json"), { force: true }).catch(() => {})
+await fs.rm(path.join(projectName, "node_modules"), { recursive: true, force: true }).catch(() => {})
 
 await load("Installing dependencies...", "Dependencies installed", async () => {
 	await $({ cwd: projectName })`${packageManager} install`

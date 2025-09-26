@@ -6,8 +6,8 @@ import { Command } from "commander"
 import boxen from "boxen"
 import chalk from "chalk"
 import figlet from "figlet"
-import fs from "fs/promises"
-import path from "path"
+import fs from "node:fs/promises"
+import path from "node:path"
 
 function detectPackageManager(): string {
 	const userAgent = process.env.npm_config_user_agent
@@ -75,7 +75,7 @@ async function load<T>(
 await load("Cloning scaffold from GitHub...", "Scaffold cloned", async () => {
 	// Clone the scaffold and only keep the scaffold directory
 	await $`git clone https://github.com/smithery-ai/create-smithery.git ${projectName}`
-	
+
 	// Use native fs operations instead of shx
 	const files = await fs.readdir(projectName)
 	for (const fileName of files) {
@@ -89,7 +89,7 @@ await load("Cloning scaffold from GitHub...", "Scaffold cloned", async () => {
 			}
 		}
 	}
-	
+
 	// Copy scaffold contents to project root
 	const scaffoldPath = path.join(projectName, "scaffold")
 	const scaffoldFiles = await fs.readdir(scaffoldPath)
@@ -103,7 +103,7 @@ await load("Cloning scaffold from GitHub...", "Scaffold cloned", async () => {
 			await fs.copyFile(src, dest)
 		}
 	}
-	
+
 	// Remove the scaffold directory
 	await fs.rm(scaffoldPath, { recursive: true, force: true })
 })
@@ -112,9 +112,15 @@ await load("Navigating to project...", "Project navigated", async () => {
 	// await $`cd ${projectName}`; Not needed - we use cwd option instead
 })
 // Clean up unnecessary files using native fs operations
-await fs.rm(path.join(projectName, ".git"), { recursive: true, force: true }).catch(() => {})
-await fs.rm(path.join(projectName, "package-lock.json"), { force: true }).catch(() => {})
-await fs.rm(path.join(projectName, "node_modules"), { recursive: true, force: true }).catch(() => {})
+await fs
+	.rm(path.join(projectName, ".git"), { recursive: true, force: true })
+	.catch(() => {})
+await fs
+	.rm(path.join(projectName, "package-lock.json"), { force: true })
+	.catch(() => {})
+await fs
+	.rm(path.join(projectName, "node_modules"), { recursive: true, force: true })
+	.catch(() => {})
 
 await load("Installing dependencies...", "Dependencies installed", async () => {
 	await $({ cwd: projectName })`${packageManager} install`
@@ -134,19 +140,17 @@ const asciiArt = figlet.textSync("Smithery", { font: "Sub-Zero" })
 console.log(
 	"\n\n\n" +
 		boxen(
-			`${chalk.blue.bold(asciiArt)}\n\n${chalk.green.bold("* Welcome to your MCP server!")}\n\nTo get started, run:\n\n${chalk.rgb(
-				234,
-				88,
-				12,
+			`${chalk.hex("#ea580c").bold(asciiArt)}\n\n${chalk.green.bold("* Welcome to your MCP server!")}\n\nTo get started, run:\n\n${chalk.bold.hex(
+				"#ff8c00",
 			)(
 				`cd ${projectName} && ${packageManager} run dev`,
-			)}\n\nTry saying something like ${chalk.cyan.bold("'Say hello to John'")},`,
+			)}\n\nTry saying something like ${chalk.bold.hex("#ff8c00")("'Say hello to John'")}`,
 			{
 				padding: 2,
 				textAlignment: "left",
 				borderStyle: "round",
-				borderColor: "blue",
-				title: chalk.blue.bold("Smithery MCP Server"),
+				borderColor: "#ea580c",
+				title: chalk.hex("#ea580c").bold("Smithery MCP Server"),
 				titleAlignment: "left",
 			},
 		),

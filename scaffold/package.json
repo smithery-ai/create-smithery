@@ -6,8 +6,8 @@
 	"module": "./src/index.ts",
 	"type": "module",
 	"scripts": {
-		"dev": "smithery dev",
-		"build": "smithery build"
+		"dev": "npx smithery dev",
+		"build": "npx smithery build"
 	},
 	"keywords": [],
 	"author": "",

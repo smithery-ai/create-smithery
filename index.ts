@@ -26,7 +26,10 @@ function detectPackageManager(): string {
 const program = new Command()
 program.argument("[projectName]", "Name of the project").parse(process.argv)
 program.option("--package-manager", "Package manager to use")
-program.option("--template <template>", "Template to use (basic or chatgpt-app)")
+program.option(
+	"--template <template>",
+	"Template to use (basic or chatgpt-app)",
+)
 
 let [projectName] = program.args
 const options = program.opts()
@@ -92,15 +95,28 @@ if (!templateChoice) {
 // Validate template choice
 const validTemplates = ["basic", "chatgpt-app"]
 if (!validTemplates.includes(templateChoice)) {
-	console.error(`Invalid template: ${templateChoice}. Choose from: ${validTemplates.join(", ")}`)
+	console.error(
+		`Invalid template: ${templateChoice}. Choose from: ${validTemplates.join(", ")}`,
+	)
 	process.exit(1)
+}
+
+// Check if directory already exists
+try {
+	await fs.access(projectName)
+	console.error(
+		`\nError: Directory "${projectName}" already exists. Please choose a different name or remove the existing directory.`,
+	)
+	process.exit(1)
+} catch {
+	// Directory doesn't exist, continue
 }
 
 // Template configurations
 const templates = {
 	basic: {
-		repo: "https://github.com/smithery-ai/create-smithery.git",
-		path: "basic",
+		repo: "https://github.com/smithery-ai/sdk.git",
+		path: "examples/basic-server",
 	},
 	"chatgpt-app": {
 		repo: "https://github.com/smithery-ai/sdk.git",
@@ -129,39 +145,48 @@ async function load<T>(
 	return result
 }
 
-await load("Cloning template from GitHub...", "Template cloned", async () => {
-	// Clone the template repo
-	await $`git clone ${selectedTemplate.repo} ${projectName}`
+try {
+	await load("Cloning template from GitHub...", "Template cloned", async () => {
+		// Clone with shallow clone for faster download (no git history)
+		await $`git clone --depth 1 ${selectedTemplate.repo} ${projectName}`
 
-	if (selectedTemplate.path !== ".") {
-		// If template is in a subdirectory, extract it
-		const templatePath = path.join(projectName, selectedTemplate.path)
-		
-		// Copy template contents to a temp directory
-		const tempDir = path.join(projectName, "_temp_template")
-		await fs.cp(templatePath, tempDir, { recursive: true })
+		if (selectedTemplate.path !== ".") {
+			// If template is in a subdirectory, extract it
+			const templatePath = path.join(projectName, selectedTemplate.path)
 
-		// Remove all files in project root
-		const files = await fs.readdir(projectName)
-		for (const fileName of files) {
-			if (fileName !== "_temp_template") {
-				const filePath = path.join(projectName, fileName)
-				await fs.rm(filePath, { recursive: true, force: true })
+			// Copy template contents to a temp directory
+			const tempDir = path.join(projectName, "_temp_template")
+			await fs.cp(templatePath, tempDir, { recursive: true })
+
+			// Remove all files in project root
+			const files = await fs.readdir(projectName)
+			for (const fileName of files) {
+				if (fileName !== "_temp_template") {
+					const filePath = path.join(projectName, fileName)
+					await fs.rm(filePath, { recursive: true, force: true })
+				}
 			}
-		}
 
-		// Move temp directory contents to project root
-		const tempFiles = await fs.readdir(tempDir)
-		for (const file of tempFiles) {
-			const src = path.join(tempDir, file)
-			const dest = path.join(projectName, file)
-			await fs.rename(src, dest)
-		}
+			// Move temp directory contents to project root
+			const tempFiles = await fs.readdir(tempDir)
+			for (const file of tempFiles) {
+				const src = path.join(tempDir, file)
+				const dest = path.join(projectName, file)
+				await fs.rename(src, dest)
+			}
 
-		// Remove temp directory
-		await fs.rm(tempDir, { recursive: true, force: true })
-	}
-})
+			// Remove temp directory
+			await fs.rm(tempDir, { recursive: true, force: true })
+		}
+	})
+} catch (error) {
+	console.error(
+		"\nFailed to clone template. Please check your internet connection and try again.",
+	)
+	// Clean up partial directory if it exists
+	await fs.rm(projectName, { recursive: true, force: true }).catch(() => {})
+	process.exit(1)
+}
 
 await load("Navigating to project...", "Project navigated", async () => {
 	// await $`cd ${projectName}`; Not needed - we use cwd option instead

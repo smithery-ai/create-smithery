@@ -24,12 +24,13 @@ function detectPackageManager(): string {
 
 // Establish CLI args/flags
 const program = new Command()
-program.argument("[projectName]", "Name of the project").parse(process.argv)
-program.option("--package-manager", "Package manager to use")
+program.argument("[projectName]", "Name of the project")
+program.option("--package-manager <manager>", "Package manager to use")
 program.option(
 	"--template <template>",
 	"Template to use (basic or chatgpt-app)",
 )
+program.parse(process.argv)
 
 let [projectName] = program.args
 const options = program.opts()

@@ -26,32 +26,89 @@ function detectPackageManager(): string {
 const program = new Command()
 program.argument("[projectName]", "Name of the project").parse(process.argv)
 program.option("--package-manager", "Package manager to use")
+program.option("--template <template>", "Template to use (basic or chatgpt-app)")
 
 let [projectName] = program.args
-const packageManager = program.opts().packageManager || detectPackageManager()
+const options = program.opts()
+const packageManager = options.packageManager || detectPackageManager()
+let templateChoice = options.template
 
 // If no project name is provided, prompt the user for it
 if (!projectName) {
-	const { projectName: promptedName } = await inquirer.prompt([
-		{
-			type: "input",
-			name: "projectName",
-			message: "What is your project name?",
-			validate: (input: string) => {
-				if (!input.trim()) {
-					return "Project name cannot be empty"
-				}
-				return true
+	try {
+		const { projectName: promptedName } = await inquirer.prompt([
+			{
+				type: "input",
+				name: "projectName",
+				message: "What is your project name?",
+				validate: (input: string) => {
+					if (!input.trim()) {
+						return "Project name cannot be empty"
+					}
+					return true
+				},
 			},
-		},
-	])
-	// Use the prompted name
-	console.log(`Creating project: ${promptedName}`)
-	projectName = promptedName
+		])
+		// Use the prompted name
+		console.log(`Creating project: ${promptedName}`)
+		projectName = promptedName
+	} catch (error) {
+		console.log("\nCancelled")
+		process.exit(0)
+	}
 } else {
 	// Use the provided name
 	console.log(`Creating project: ${projectName}`)
 }
+
+// Prompt for template selection if not provided via flag
+if (!templateChoice) {
+	try {
+		const { template } = await inquirer.prompt([
+			{
+				type: "list",
+				name: "template",
+				message: "Select template:",
+				choices: [
+					{
+						name: `basic ${chalk.gray("(Simple MCP server scaffold)")}`,
+						value: "basic",
+					},
+					{
+						name: `chatgpt-app ${chalk.yellow("[beta]")} ${chalk.gray("(OpenAI app scaffold)")}`,
+						value: "chatgpt-app",
+					},
+				],
+				default: "basic",
+			},
+		])
+		templateChoice = template
+	} catch (error) {
+		console.log("\nCancelled")
+		process.exit(0)
+	}
+}
+
+// Validate template choice
+const validTemplates = ["basic", "chatgpt-app"]
+if (!validTemplates.includes(templateChoice)) {
+	console.error(`Invalid template: ${templateChoice}. Choose from: ${validTemplates.join(", ")}`)
+	process.exit(1)
+}
+
+// Template configurations
+const templates = {
+	basic: {
+		repo: "https://github.com/smithery-ai/create-smithery.git",
+		path: "basic",
+	},
+	"chatgpt-app": {
+		repo: "https://github.com/smithery-ai/sdk.git",
+		path: "examples/open-ai-hello-server",
+	},
+}
+
+const selectedTemplate = templates[templateChoice as keyof typeof templates]
 
 async function load<T>(
 	startMsg: string,
@@ -72,40 +129,38 @@ async function load<T>(
 	return result
 }
 
-await load("Cloning scaffold from GitHub...", "Scaffold cloned", async () => {
-	// Clone the scaffold and only keep the scaffold directory
-	await $`git clone https://github.com/smithery-ai/create-smithery.git ${projectName}`
+await load("Cloning template from GitHub...", "Template cloned", async () => {
+	// Clone the template repo
+	await $`git clone ${selectedTemplate.repo} ${projectName}`
 
-	// Use native fs operations instead of shx
-	const files = await fs.readdir(projectName)
-	for (const fileName of files) {
-		if (fileName !== "scaffold" && fileName !== "." && fileName !== "..") {
-			const filePath = path.join(projectName, fileName)
-			const stats = await fs.stat(filePath)
-			if (stats.isDirectory()) {
+	if (selectedTemplate.path !== ".") {
+		// If template is in a subdirectory, extract it
+		const templatePath = path.join(projectName, selectedTemplate.path)
+		
+		// Copy template contents to a temp directory
+		const tempDir = path.join(projectName, "_temp_template")
+		await fs.cp(templatePath, tempDir, { recursive: true })
+
+		// Remove all files in project root
+		const files = await fs.readdir(projectName)
+		for (const fileName of files) {
+			if (fileName !== "_temp_template") {
+				const filePath = path.join(projectName, fileName)
 				await fs.rm(filePath, { recursive: true, force: true })
-			} else {
-				await fs.unlink(filePath)
 			}
 		}
-	}
 
-	// Copy scaffold contents to project root
-	const scaffoldPath = path.join(projectName, "scaffold")
-	const scaffoldFiles = await fs.readdir(scaffoldPath)
-	for (const file of scaffoldFiles) {
-		const src = path.join(scaffoldPath, file)
-		const dest = path.join(projectName, file)
-		const stats = await fs.stat(src)
-		if (stats.isDirectory()) {
-			await fs.cp(src, dest, { recursive: true })
-		} else {
-			await fs.copyFile(src, dest)
+		// Move temp directory contents to project root
+		const tempFiles = await fs.readdir(tempDir)
+		for (const file of tempFiles) {
+			const src = path.join(tempDir, file)
+			const dest = path.join(projectName, file)
+			await fs.rename(src, dest)
 		}
-	}
 
-	// Remove the scaffold directory
-	await fs.rm(scaffoldPath, { recursive: true, force: true })
+		// Remove temp directory
+		await fs.rm(tempDir, { recursive: true, force: true })
+	}
 })
 
 await load("Navigating to project...", "Project navigated", async () => {

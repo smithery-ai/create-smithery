@@ -36,6 +36,7 @@ let [projectName] = program.args
 const options = program.opts()
 const packageManager = options.packageManager || detectPackageManager()
 let templateChoice = options.template
+let needsFilesystemAccess = false
 
 // If no project name is provided, prompt the user for it
 if (!projectName) {
@@ -65,36 +66,57 @@ if (!projectName) {
 	console.log(`Creating project: ${projectName}`)
 }
 
-// Prompt for template selection if not provided via flag
-if (!templateChoice) {
-	try {
-		const { template } = await inquirer.prompt([
-			{
-				type: "list",
-				name: "template",
-				message: "Select template:",
-				choices: [
-					{
-						name: `basic ${chalk.gray("(Simple MCP server scaffold)")}`,
-						value: "basic",
-					},
-					{
-						name: `chatgpt-app ${chalk.yellow("[beta]")} ${chalk.gray("(OpenAI app scaffold)")}`,
-						value: "chatgpt-app",
-					},
-				],
-				default: "basic",
-			},
-		])
-		templateChoice = template
-	} catch (error) {
-		console.log("\nCancelled")
-		process.exit(0)
+// Ask about filesystem access
+try {
+	const { filesystemAccess } = await inquirer.prompt([
+		{
+			type: "confirm",
+			name: "filesystemAccess",
+			message: `Does your server need local filesystem access?\n  ${chalk.gray("(If Yes, it won't be hosted and will run on user's device)")}`,
+			default: false,
+		},
+	])
+	needsFilesystemAccess = filesystemAccess
+} catch (error) {
+	console.log("\nCancelled")
+	process.exit(0)
+}
+
+// If needs filesystem access, use the local template and skip template selection
+if (needsFilesystemAccess) {
+	templateChoice = "local"
+} else {
+	// Prompt for template selection if not provided via flag
+	if (!templateChoice) {
+		try {
+			const { template } = await inquirer.prompt([
+				{
+					type: "list",
+					name: "template",
+					message: "Select template:",
+					choices: [
+						{
+							name: `basic ${chalk.gray("(Simple MCP server scaffold)")}`,
+							value: "basic",
+						},
+						{
+							name: `chatgpt-app ${chalk.yellow("[beta]")} ${chalk.gray("(OpenAI app scaffold)")}`,
+							value: "chatgpt-app",
+						},
+					],
+					default: "basic",
+				},
+			])
+			templateChoice = template
+		} catch (error) {
+			console.log("\nCancelled")
+			process.exit(0)
+		}
 	}
 }
 
 // Validate template choice
-const validTemplates = ["basic", "chatgpt-app"]
+const validTemplates = ["basic", "chatgpt-app", "local"]
 if (!validTemplates.includes(templateChoice)) {
 	console.error(
 		`Invalid template: ${templateChoice}. Choose from: ${validTemplates.join(", ")}`,
@@ -122,6 +144,10 @@ const templates = {
 	"chatgpt-app": {
 		repo: "https://github.com/smithery-ai/sdk.git",
 		path: "examples/open-ai-hello-server",
+	},
+	local: {
+		repo: "https://github.com/smithery-ai/sdk.git",
+		path: "examples/local-filesystem",
 	},
 }
 
@@ -184,6 +210,7 @@ try {
 	console.error(
 		"\nFailed to clone template. Please check your internet connection and try again.",
 	)
+	console.error("Error details:", error)
 	// Clean up partial directory if it exists
 	await fs.rm(projectName, { recursive: true, force: true }).catch(() => {})
 	process.exit(1)

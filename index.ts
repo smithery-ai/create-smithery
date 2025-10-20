@@ -9,6 +9,7 @@ import { load } from "./utils/loader.js"
 import { SMITHERY_ASCII } from "./utils/smithery-ascii.js"
 import cliSpinners from "cli-spinners"
 import { existsSync } from "node:fs"
+import packageJson from "./package.json" with { type: "json" }
 
 const program = new Command()
 program.argument("[name]", "Name of the project")
@@ -199,7 +200,9 @@ ${chalk.white("To publish:")} ${chalk.cyan("https://smithery.ai/new")}`
 			margin: 1,
 			borderStyle: "round",
 			borderColor: "#ea580c",
-			width: 75,
+			width: Math.min(Math.max(process.stdout.columns - 4, 60), 120),
+			title: `${packageJson.name} ${chalk.dim(`v${packageJson.version}`)}`,
+			titleAlignment: "left",
 		}),
 	)
 

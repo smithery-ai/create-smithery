@@ -24,6 +24,16 @@ program.parse(process.argv)
 const args = program.args
 const opts = program.opts()
 
+// Validate early: GPT apps can only use HTTP transport
+if (opts.gpt && opts.transport && opts.transport !== "http") {
+	console.error(
+		chalk.red(
+			"✖ ChatGPT apps can only use HTTP transport. Please remove the --transport flag or use --transport http",
+		),
+	)
+	process.exit(1)
+}
+
 interface Config {
 	projectName: string
 	transport: string

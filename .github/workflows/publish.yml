@@ -36,11 +36,11 @@ jobs:
 
       - name: Bump version
         run: |
-          npm version patch -m "chore: bump version to %s [skip ci]"
+          bun pm version patch -m "chore: bump version to %s [skip ci]"
           git push
           git push --tags
 
       - name: Publish to npm
-        run: npm publish --access public
+        run: bun publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

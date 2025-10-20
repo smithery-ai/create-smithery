@@ -80,7 +80,7 @@ npx create-smithery --gpt
 ## Combined Example
 
 ```bash
-npm create smithery my-project -- --transport stdio --package-manager bun
+npx create-smithery --transport stdio --package-manager bun
 ```
 
 ## Development
@@ -91,3 +91,4 @@ To work on this package locally:
 2. Run `bun install` to install dependencies
 3. Run `bun run build` to build the project
 4. To test your local changes, run `bun run start`
+5. To run the test suite, run `bun run test`

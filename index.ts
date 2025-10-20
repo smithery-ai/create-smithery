@@ -8,12 +8,16 @@ import { installPackages } from "./utils/install.js"
 import { load } from "./utils/loader.js"
 import { SMITHERY_ASCII } from "./utils/smithery-ascii.js"
 import cliSpinners from "cli-spinners"
+import { existsSync } from "node:fs"
 
 const program = new Command()
 program.argument("[name]", "Name of the project")
 program.option("-t, --transport <transport>", "Transport to use. HTTP or STDIO")
 program.option("--gpt", "Initialise a chatgpt app")
-// program.option("--package-manager <manager>", "Package manager to use") ignore for now
+program.option(
+	"-p, --package-manager <manager>",
+	"Package manager to use (npm, yarn, pnpm, bun)",
+)
 program.parse(process.argv)
 
 const args = program.args
@@ -23,12 +27,15 @@ interface Config {
 	projectName: string
 	transport: string
 	isGpt: boolean
+	packageManager: string
+	betaMessage: string | null
 }
 
 async function promptForMissingValues(
 	projectName?: string,
 	transport?: string,
-	isGpt?: boolean
+	isGpt?: boolean,
+	packageManager?: string,
 ): Promise<Config> {
 	const questions: any[] = []
 
@@ -38,6 +45,50 @@ async function promptForMissingValues(
 			name: "projectName",
 			message: "What is your project name?",
 			default: "my-smithery-app",
+			validate: (input: string) => {
+				if (existsSync(input)) {
+					return `Directory already exists. Please choose a different name`
+				}
+				return true
+			},
+		})
+	} else if (existsSync(projectName)) {
+		console.error(
+			chalk.yellow(
+				`✖ Directory already exists. Please choose a different name`,
+			),
+		)
+		console.error(
+			chalk.cyan(`Use a different name: npx create-smithery <name>`),
+		)
+		process.exit(1)
+	}
+
+	// Ask for package manager after project name
+	if (!packageManager) {
+		questions.push({
+			type: "list",
+			name: "packageManager",
+			message: "Select a package manager:",
+			choices: [
+				{
+					name: "npm",
+					value: "npm",
+				},
+				{
+					name: "yarn",
+					value: "yarn",
+				},
+				{
+					name: "pnpm",
+					value: "pnpm",
+				},
+				{
+					name: "bun",
+					value: "bun",
+				},
+			],
+			default: "npm",
 		})
 	}
 
@@ -67,28 +118,41 @@ async function promptForMissingValues(
 		projectName: projectName || answers.projectName,
 		transport: transport || answers.transport || "http",
 		isGpt: isGpt || false,
+		packageManager: packageManager || answers.packageManager || "npm",
+		betaMessage: null, // Default to null, will be set later if needed
 	}
 }
 
 async function main() {
-	const config = await promptForMissingValues(args[0], opts.transport, opts.gpt)
+	const config = await promptForMissingValues(
+		args[0],
+		opts.transport,
+		opts.gpt,
+		opts.packageManager,
+	)
 
 	// Determine repo URL based on config
 	let repoUrl: string
 	let templatePath: string
+	let betaMessage: string | null = null
 	if (config.isGpt) {
 		repoUrl = GIT_REPOS.gpt.repo
 		templatePath = GIT_REPOS.gpt.path
+		betaMessage = GIT_REPOS.gpt.betaMessage
 	} else if (config.transport === "stdio") {
 		repoUrl = GIT_REPOS.stdio.repo
 		templatePath = GIT_REPOS.stdio.path
+		betaMessage = GIT_REPOS.stdio.betaMessage
 	} else {
 		repoUrl = GIT_REPOS.http.repo
 		templatePath = GIT_REPOS.http.path
+		betaMessage = GIT_REPOS.http.betaMessage
 	}
 
 	// Clone the repository
-	console.log(chalk.gray(`  $ git clone --depth 1 '${repoUrl}' ${config.projectName}`))
+	console.log(
+		chalk.gray(`  $ git clone --depth 1 '${repoUrl}' ${config.projectName}`),
+	)
 	const cloneResult = await load(
 		"Cloning repository...",
 		"Repository cloned",
@@ -103,12 +167,12 @@ async function main() {
 	}
 
 	// Install packages
-	console.log(chalk.gray(`  $ npm install`))
+	console.log(chalk.gray(`  $ ${config.packageManager} install`))
 	const installResult = await load(
 		"Installing packages...",
-		"Packages installed",
-		() => installPackages(config.projectName),
-		cliSpinners.star2,
+		`Packages installed`,
+		() => installPackages(config.projectName, config.packageManager),
+		cliSpinners.toggle13,
 		"yellow",
 	)
 
@@ -127,7 +191,13 @@ ${chalk.white("To get started, run:")}
 
 ${chalk.white("Try saying something like")} ${chalk.cyan("'Say hello to John'")}
 
-${chalk.white("To publish:")} ${chalk.cyan("https://smithery.ai/new")}`
+${chalk.white("To publish:")} ${chalk.cyan("https://smithery.ai/new")}${
+		betaMessage
+			? `
+
+${chalk.yellow(betaMessage)}`
+			: ""
+	}`
 
 	console.log(
 		boxen(message, {
@@ -135,8 +205,30 @@ ${chalk.white("To publish:")} ${chalk.cyan("https://smithery.ai/new")}`
 			margin: 1,
 			borderStyle: "round",
 			borderColor: "#ea580c",
-		})
+			width: 75,
+		}),
 	)
 }
 
-main().catch(console.error)
+export { promptForMissingValues, main }
+
+// Handle Ctrl+C gracefully
+process.on("SIGINT", () => {
+	console.log(`\n${chalk.yellow("Setup cancelled")}`)
+	process.exit(0)
+})
+
+main().catch(error => {
+	// Check if this is a user cancellation from inquirer
+	if (
+		error.isTtyError ||
+		error.message === "User force closed the prompt" ||
+		error.message?.includes("SIGINT")
+	) {
+		console.log(chalk.yellow("Cancelled"))
+		process.exit(0)
+	} else {
+		console.error(chalk.red("An error occurred:"), error.message)
+		process.exit(1)
+	}
+})

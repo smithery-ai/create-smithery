@@ -7,6 +7,9 @@
 		"create-smithery": "dist/index.js"
 	},
 	"type": "module",
+	"files": [
+		"dist"
+	],
 	"scripts": {
 		"prepare": "bun run build",
 		"build": "bun build ./index.ts --outdir dist --target node --minify && chmod +x dist/index.js",

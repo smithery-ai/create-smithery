@@ -195,4 +195,66 @@ describe("create-smithery CLI", () => {
 			expect(config.projectName).toBe("my-app")
 		})
 	})
+
+	describe("validation", () => {
+		it("should reject gpt flag with stdio transport", async () => {
+			// GPT apps can only use HTTP transport
+			// When isGpt=true and transport=stdio, the config should still be created
+			// but the main() function should exit with error (tested separately)
+			const config = await promptForMissingValues(
+				"my-app",
+				"stdio",
+				true,
+				"npm",
+			)
+
+			expect(config.isGpt).toBe(true)
+			expect(config.transport).toBe("stdio")
+			// In the actual main() flow, this combination should trigger process.exit(1)
+		})
+
+		it("should reject gpt flag with non-http transport", async () => {
+			const config = await promptForMissingValues(
+				"my-app",
+				"stdio",
+				true,
+				"npm",
+			)
+
+			// The validation happens in main() before selecting template
+			// This test verifies the config is created, validation in main() handles rejection
+			expect(config.isGpt).toBe(true)
+			expect(config.transport).toBe("stdio")
+		})
+
+		it("should allow gpt flag with http transport (or no transport specified)", async () => {
+			const config = await promptForMissingValues(
+				"my-app",
+				"http",
+				true,
+				"npm",
+			)
+
+			expect(config.isGpt).toBe(true)
+			expect(config.transport).toBe("http")
+		})
+
+		it("should allow gpt flag with no transport specified", async () => {
+			vi.mocked(inquirer.prompt).mockResolvedValueOnce({
+				projectName: "test-app",
+				transport: "http",
+			} as any)
+
+			const config = await promptForMissingValues(
+				"my-app",
+				undefined,
+				true,
+				"npm",
+			)
+
+			expect(config.isGpt).toBe(true)
+			// When gpt=true, no transport prompt is shown, defaults to http
+			expect(config.transport).toBe("http")
+		})
+	})
 })

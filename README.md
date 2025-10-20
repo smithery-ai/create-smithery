@@ -52,7 +52,7 @@ npx create-smithery --transport stdio
 ```
 
 - **HTTP**: Runs on a server (remotely accessible)
-- **STDIO**: Runs on the user's machine (when you need access to user's machine)
+- **STDIO**: Runs on the user's machine (when you need filesystem access)
 
 If not specified, you'll be prompted to choose (defaults to HTTP).
 

@@ -15,3 +15,8 @@ export const GIT_REPOS = {
 		betaMessage: "⚠ Notice: ChatGPT apps support is currently in beta.",
 	},
 } as const
+
+export const LINKS = {
+	publish: "https://smithery.ai/new",
+	reportIssues: "https://github.com/smithery-ai/create-smithery/issues/new",
+} as const

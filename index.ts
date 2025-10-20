@@ -5,7 +5,7 @@ import { Command } from "commander"
 import chalk from "chalk"
 import boxen from "boxen"
 import { cloneRepository } from "./utils/git.js"
-import { GIT_REPOS } from "./constants.js"
+import { GIT_REPOS, LINKS } from "./constants.js"
 import { installPackages } from "./utils/install.js"
 import { load } from "./utils/loader.js"
 import { SMITHERY_ASCII } from "./utils/smithery-ascii.js"
@@ -204,7 +204,8 @@ ${chalk.white("To get started, run:")}
 
 ${chalk.white("Try saying something like")} ${chalk.cyan("'Say hello to John'")}
 
-${chalk.white("To publish:")} ${chalk.cyan("https://smithery.ai/new")}`
+${chalk.white("To publish:")} ${chalk.cyan.dim(LINKS.publish)}
+${chalk.white("Report issues:")} ${chalk.cyan.dim(LINKS.reportIssues)}`
 
 	console.log(
 		boxen(message, {

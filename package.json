@@ -11,7 +11,7 @@
 		"prepare": "bun run build",
 		"build": "bun build ./index.ts --outdir dist --target node --minify",
 		"start": "rm -rf my-smithery-app && bun run build && node dist/index.js",
-		"check": "bun run @biomejs/biome check --write --unsafe",
+		"check": "biome check --write --unsafe",
 		"test": "vitest"
 	},
 	"keywords": [],

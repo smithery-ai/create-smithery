@@ -2,11 +2,11 @@ import inquirer from "inquirer"
 import { Command } from "commander"
 import chalk from "chalk"
 import boxen from "boxen"
-import cfonts from "cfonts"
-import { cloneRepository } from "./git.js"
+import { cloneRepository } from "./utils/git.js"
 import { GIT_REPOS } from "./constants.js"
-import { installPackages } from "./install.js"
-import { load } from "./loader.js"
+import { installPackages } from "./utils/install.js"
+import { load } from "./utils/loader.js"
+import { SMITHERY_ASCII } from "./utils/smithery-ascii.js"
 import cliSpinners from "cli-spinners"
 
 const program = new Command()
@@ -117,27 +117,24 @@ async function main() {
 		process.exit(1)
 	}
 
-	// Display SMITHERY in tiny font using cfonts
-	const smitheryOutput = cfonts.render("SMITHERY", {
-		font: "tiny",
-		colors: ["#ea580c"],
-		spaceless: true,
-	})
+	// Display SMITHERY ASCII art
+	const smitheryOutput = chalk.hex("#ea580c")(SMITHERY_ASCII)
 
 	const message = `${smitheryOutput}
+
 ${chalk.white("To get started, run:")}
-  ${chalk.white(`cd ${config.projectName} && npm run dev`)}
+  ${chalk.cyan(`cd ${config.projectName} && npm run dev`)}
 
-${chalk.white("Try saying something like")} ${chalk.bold.hex("#ff8c00")("'Say hello to John'")}
+${chalk.white("Try saying something like")} ${chalk.cyan("'Say hello to John'")}
 
-${chalk.white("To publish:")} ${chalk.hex("#00d4ff")("https://smithery.ai/new")}`
+${chalk.white("To publish:")} ${chalk.cyan("https://smithery.ai/new")}`
 
 	console.log(
 		boxen(message, {
 			padding: 1,
 			margin: 1,
 			borderStyle: "round",
-			borderColor: "cyan",
+			borderColor: "#ea580c",
 		})
 	)
 }

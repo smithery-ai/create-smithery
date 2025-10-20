@@ -172,7 +172,7 @@ async function main() {
 		"Installing packages...",
 		`Packages installed`,
 		() => installPackages(config.projectName, config.packageManager),
-		cliSpinners.toggle13,
+		cliSpinners.star,
 		"yellow",
 	)
 

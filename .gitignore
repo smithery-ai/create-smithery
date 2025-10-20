@@ -10,3 +10,6 @@ scaffold/package-lock.json
 npm-debug.log*
 build/
 *.log
+
+# other
+notes.txt

@@ -191,13 +191,7 @@ ${chalk.white("To get started, run:")}
 
 ${chalk.white("Try saying something like")} ${chalk.cyan("'Say hello to John'")}
 
-${chalk.white("To publish:")} ${chalk.cyan("https://smithery.ai/new")}${
-		betaMessage
-			? `
-
-${chalk.yellow(betaMessage)}`
-			: ""
-	}`
+${chalk.white("To publish:")} ${chalk.cyan("https://smithery.ai/new")}`
 
 	console.log(
 		boxen(message, {
@@ -208,6 +202,10 @@ ${chalk.yellow(betaMessage)}`
 			width: 75,
 		}),
 	)
+
+	if (betaMessage) {
+		console.log(`${chalk.yellow(betaMessage)}\n`)
+	}
 }
 
 export { promptForMissingValues, main }

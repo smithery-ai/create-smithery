@@ -152,47 +152,101 @@ describe("create-smithery CLI", () => {
 		}
 	})
 
-	describe("execution flow", () => {
-		it("should install after clone succeeds", async () => {
-			vi.mocked(cloneRepository).mockResolvedValueOnce({
-				success: true,
-				message: "",
-			})
-			vi.mocked(installPackages).mockResolvedValueOnce({
-				success: true,
-				message: "",
-			})
+	describe("config completeness", () => {
+		it("should have all required properties after prompting", async () => {
+			const config = await promptForMissingValues(
+				"my-app",
+				"http",
+				false,
+				"npm",
+			)
 
-			const config = await promptForMissingValues("my-app", "http", false)
-
-			expect(config.projectName).toBe("my-app")
+			// Verify all properties exist
+			expect(config).toHaveProperty("projectName")
+			expect(config).toHaveProperty("transport")
+			expect(config).toHaveProperty("isGpt")
+			expect(config).toHaveProperty("packageManager")
+			expect(config).toHaveProperty("betaMessage")
 		})
 
-		it("should call clone and install in sequence when integration runs", async () => {
-			vi.mocked(cloneRepository).mockResolvedValueOnce({
-				success: true,
-				message: "",
-			})
-			vi.mocked(installPackages).mockResolvedValueOnce({
-				success: true,
-				message: "",
-			})
+		it("should have valid projectName", async () => {
+			const config = await promptForMissingValues(
+				"my-app",
+				"http",
+				false,
+				"npm",
+			)
 
-			const config = await promptForMissingValues("my-app", "http", false)
-
-			// Verify basic config
-			expect(config.projectName).toBe("my-app")
+			expect(typeof config.projectName).toBe("string")
+			expect(config.projectName.length).toBeGreaterThan(0)
 		})
 
-		it("clone failure should prevent install", async () => {
-			vi.mocked(cloneRepository).mockResolvedValueOnce({
-				success: false,
-				message: "Clone failed",
-				error: new Error("Clone failed"),
+		it("should have valid transport value", async () => {
+			const config = await promptForMissingValues(
+				"my-app",
+				"stdio",
+				false,
+				"npm",
+			)
+
+			expect(["http", "stdio"]).toContain(config.transport)
+		})
+
+		it("should have valid packageManager value", async () => {
+			const config = await promptForMissingValues(
+				"my-app",
+				"http",
+				false,
+				"bun",
+			)
+
+			expect(["npm", "yarn", "pnpm", "bun"]).toContain(config.packageManager)
+		})
+
+		it("should have boolean isGpt", async () => {
+			const config = await promptForMissingValues(
+				"my-app",
+				"http",
+				true,
+				"npm",
+			)
+
+			expect(typeof config.isGpt).toBe("boolean")
+		})
+
+		it("should have valid betaMessage (null or string)", async () => {
+			const config = await promptForMissingValues(
+				"my-app",
+				"http",
+				false,
+				"npm",
+			)
+
+			expect(
+				config.betaMessage === null || typeof config.betaMessage === "string",
+			).toBe(true)
+		})
+
+		it("should fill defaults when partial args provided", async () => {
+			vi.mocked(inquirer.prompt).mockResolvedValueOnce({
+				projectName: "test-app",
+				packageManager: "npm",
+				transport: "http",
 			} as any)
 
-			const config = await promptForMissingValues("my-app", "http", false)
-			expect(config.projectName).toBe("my-app")
+			const config = await promptForMissingValues(
+				"my-app",
+				undefined,
+				undefined,
+				undefined,
+			)
+
+			// Should have all properties filled (either from args or prompts)
+			expect(config.projectName).toBeDefined()
+			expect(config.transport).toBeDefined()
+			expect(config.packageManager).toBeDefined()
+			expect(config.isGpt).toBeDefined()
+			expect(config.betaMessage).toBeDefined()
 		})
 	})
 
@@ -255,6 +309,50 @@ describe("create-smithery CLI", () => {
 			expect(config.isGpt).toBe(true)
 			// When gpt=true, no transport prompt is shown, defaults to http
 			expect(config.transport).toBe("http")
+		})
+	})
+
+	describe("execution flow", () => {
+		it("should install after clone succeeds", async () => {
+			vi.mocked(cloneRepository).mockResolvedValueOnce({
+				success: true,
+				message: "",
+			})
+			vi.mocked(installPackages).mockResolvedValueOnce({
+				success: true,
+				message: "",
+			})
+
+			const config = await promptForMissingValues("my-app", "http", false)
+
+			expect(config.projectName).toBe("my-app")
+		})
+
+		it("should call clone and install in sequence when integration runs", async () => {
+			vi.mocked(cloneRepository).mockResolvedValueOnce({
+				success: true,
+				message: "",
+			})
+			vi.mocked(installPackages).mockResolvedValueOnce({
+				success: true,
+				message: "",
+			})
+
+			const config = await promptForMissingValues("my-app", "http", false)
+
+			// Verify basic config
+			expect(config.projectName).toBe("my-app")
+		})
+
+		it("clone failure should prevent install", async () => {
+			vi.mocked(cloneRepository).mockResolvedValueOnce({
+				success: false,
+				message: "Clone failed",
+				error: new Error("Clone failed"),
+			} as any)
+
+			const config = await promptForMissingValues("my-app", "http", false)
+			expect(config.projectName).toBe("my-app")
 		})
 	})
 })

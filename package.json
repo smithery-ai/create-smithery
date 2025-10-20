@@ -9,7 +9,7 @@
 	"type": "module",
 	"scripts": {
 		"prepare": "bun run build",
-		"build": "bun build ./index.ts --outdir dist --target node --minify",
+		"build": "bun build ./index.ts --outdir dist --target node --minify && chmod +x dist/index.js",
 		"start": "rm -rf my-smithery-app && bun run build && node dist/index.js",
 		"check": "biome check --write --unsafe",
 		"test": "vitest"

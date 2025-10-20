@@ -1,9 +1,10 @@
-name: Release
+name: CI
 
 on:
   push:
-    tags:
-      - v*
+    branches:
+      - main
+  pull_request:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -30,20 +31,3 @@ jobs:
 
       - run: bun install
       - run: bun run build
-
-  publish:
-    runs-on: ubuntu-latest
-    needs: [test, build]
-
-    permissions:
-      contents: read
-      id-token: write
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-
-      - run: bun install
-      - run: bun publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

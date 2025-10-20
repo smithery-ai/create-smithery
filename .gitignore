@@ -1,6 +1,7 @@
 node_modules
 dist
 my-app
+my-smithery-app
 scaffold/package-lock.json
 
 # Secure Project - node patterns
@@ -9,3 +10,6 @@ scaffold/package-lock.json
 npm-debug.log*
 build/
 *.log
+
+# other
+notes.txt

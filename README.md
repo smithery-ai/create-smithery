@@ -6,36 +6,89 @@ This package helps you set up a new Smithery project for building MCPs.
 
 ## Usage
 
-To create a new Smithery project, run the following command in your terminal:
+To create a new Smithery project, run:
 
 ```bash
-npm create smithery
+npx create-smithery@latest
 ```
 
-You will be prompted to enter a name for your project. A new directory will be created with that name, containing a basic Smithery project structure.
-
-Alternatively, you can specify the project name directly:
+Or with `bun`:
 
 ```bash
-npm create smithery <your-project-name>
+bunx create-smithery@latest
 ```
+
+You will be prompted to configure your project interactively.
+
+Alternatively, specify the project name directly:
+
+```bash
+npx create-smithery <project-name>
+```
+
+or
+
+```bash
+bunx create-smithery <project-name>
+```
+
+## Options
+
+### Project Name
+
+Set the project name as the first argument:
+
+```bash
+npx create-smithery my-awesome-mcp
+```
+
+### Transport Type
+
+Choose how your MCP will communicate. Use the `-t` or `--transport` flag:
+
+```bash
+npx create-smithery --transport http
+npx create-smithery --transport stdio
+```
+
+- **HTTP**: Runs on a server (remotely accessible)
+- **STDIO**: Runs on the user's machine (when you need filesystem access)
+
+If not specified, you'll be prompted to choose (defaults to HTTP).
 
 ### Package Manager
 
-You can specify a package manager to use for installing dependencies. By default, it uses `npm`.
-
-To use a different package manager, use the `--package-manager` flag:
+Specify which package manager to use for installing dependencies:
 
 ```bash
-npm create smithery -- --package-manager <yarn|pnpm|bun>
+npx create-smithery --package-manager npm
+npx create-smithery --package-manager yarn
+npx create-smithery --package-manager pnpm
+npx create-smithery --package-manager bun
 ```
-Note the extra `--` which is needed to pass flags to the underlying script.
+
+Defaults to `npm` if not specified.
+
+### ChatGPT App
+
+Initialize a ChatGPT app instead of a standard MCP:
+
+```bash
+npx create-smithery --gpt
+```
+
+## Combined Example
+
+```bash
+npx create-smithery --transport stdio --package-manager bun
+```
 
 ## Development
 
 To work on this package locally:
 
-1. Clone the repository.
-2. Run `npm install` to install dependencies.
-3. Run `npm run build` to build the project.
-4. To test your local changes, you can run `node dist/index.js <test-project-name>`.
+1. Clone the repository
+2. Run `bun install` to install dependencies
+3. Run `bun run build` to build the project
+4. To test your local changes, run `bun run start`
+5. To run the test suite, run `bun run test`

@@ -200,11 +200,11 @@ async function main() {
 	const message = `${smitheryOutput}
 
 ${chalk.white("To get started, run:")}
-  ${chalk.cyan(`cd ${config.projectName} && npm run dev`)}
+  ${chalk.cyan(`cd ${config.projectName} && ${config.packageManager} run dev`)}
 
 ${chalk.white("Try saying something like")} ${chalk.cyan("'Say hello to John'")}
 
-${chalk.white("To publish:")} ${chalk.cyan.dim(LINKS.publish)}
+${chalk.white("To publish:")} ${chalk.cyan(LINKS.publish)}
 ${chalk.white("Report issues:")} ${chalk.cyan.dim(LINKS.reportIssues)}`
 
 	console.log(

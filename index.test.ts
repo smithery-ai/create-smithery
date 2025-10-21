@@ -204,12 +204,7 @@ describe("create-smithery CLI", () => {
 		})
 
 		it("should have boolean isGpt", async () => {
-			const config = await promptForMissingValues(
-				"my-app",
-				"http",
-				true,
-				"npm",
-			)
+			const config = await promptForMissingValues("my-app", "http", true, "npm")
 
 			expect(typeof config.isGpt).toBe("boolean")
 		})
@@ -282,12 +277,7 @@ describe("create-smithery CLI", () => {
 		})
 
 		it("should allow gpt flag with http transport (or no transport specified)", async () => {
-			const config = await promptForMissingValues(
-				"my-app",
-				"http",
-				true,
-				"npm",
-			)
+			const config = await promptForMissingValues("my-app", "http", true, "npm")
 
 			expect(config.isGpt).toBe(true)
 			expect(config.transport).toBe("http")

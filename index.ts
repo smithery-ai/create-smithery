@@ -19,7 +19,7 @@ program.option("-t, --transport <transport>", "Transport to use. HTTP or STDIO")
 program.option("--gpt", "Initialise a chatgpt app")
 program.option(
 	"-p, --package-manager <manager>",
-	"Package manager to use (npm, yarn, pnpm, bun)",
+	"Package manager to use (npm, bun)",
 )
 program.parse(process.argv)
 
@@ -87,14 +87,6 @@ async function promptForMissingValues(
 				{
 					name: "npm",
 					value: "npm",
-				},
-				{
-					name: "yarn",
-					value: "yarn",
-				},
-				{
-					name: "pnpm",
-					value: "pnpm",
 				},
 				{
 					name: "bun",

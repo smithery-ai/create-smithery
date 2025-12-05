@@ -62,20 +62,10 @@ Specify which package manager to use for installing dependencies:
 
 ```bash
 npx create-smithery --package-manager npm
-npx create-smithery --package-manager yarn
-npx create-smithery --package-manager pnpm
 npx create-smithery --package-manager bun
 ```
 
 Defaults to `npm` if not specified.
-
-### ChatGPT App
-
-Initialize a ChatGPT app instead of a standard MCP:
-
-```bash
-npx create-smithery --gpt
-```
 
 ## Combined Example
 

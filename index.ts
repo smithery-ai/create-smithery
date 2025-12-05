@@ -18,7 +18,7 @@ program.argument("[name]", "Name of the project")
 program.option("-t, --transport <transport>", "Transport to use. HTTP or STDIO")
 program.option(
 	"-p, --package-manager <manager>",
-	"Package manager to use (npm, bun)",
+	"Package manager to use (npm, bun, pnpm, yarn)",
 )
 program.parse(process.argv)
 
@@ -78,6 +78,14 @@ async function promptForMissingValues(
 				{
 					name: "bun",
 					value: "bun",
+				},
+				{
+					name: "pnpm",
+					value: "pnpm",
+				},
+				{
+					name: "yarn",
+					value: "yarn",
 				},
 			],
 			default: "npm",

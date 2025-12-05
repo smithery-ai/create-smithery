@@ -16,7 +16,6 @@ import packageJson from "./package.json" with { type: "json" }
 const program = new Command()
 program.argument("[name]", "Name of the project")
 program.option("-t, --transport <transport>", "Transport to use. HTTP or STDIO")
-program.option("--gpt", "Initialise a chatgpt app")
 program.option(
 	"-p, --package-manager <manager>",
 	"Package manager to use (npm, bun)",
@@ -26,20 +25,9 @@ program.parse(process.argv)
 const args = program.args
 const opts = program.opts()
 
-// Validate early: GPT apps can only use HTTP transport
-if (opts.gpt && opts.transport && opts.transport !== "http") {
-	console.error(
-		chalk.red(
-			"✖ ChatGPT apps can only use HTTP transport. Please remove the --transport flag or use --transport http",
-		),
-	)
-	process.exit(1)
-}
-
 interface Config {
 	projectName: string
 	transport: string
-	isGpt: boolean
 	packageManager: string
 	betaMessage: string | null
 }
@@ -47,7 +35,6 @@ interface Config {
 async function promptForMissingValues(
 	projectName?: string,
 	transport?: string,
-	isGpt?: boolean,
 	packageManager?: string,
 ): Promise<Config> {
 	const questions: any[] = []
@@ -98,7 +85,7 @@ async function promptForMissingValues(
 	}
 
 	// Then ask for transport if needed
-	if (!transport && !isGpt) {
+	if (!transport) {
 		questions.push({
 			type: "list",
 			name: "transport",
@@ -122,7 +109,6 @@ async function promptForMissingValues(
 	return {
 		projectName: projectName || answers.projectName,
 		transport: transport || answers.transport || "http",
-		isGpt: isGpt || false,
 		packageManager: packageManager || answers.packageManager || "npm",
 		betaMessage: null, // Default to null, will be set later if needed
 	}
@@ -132,7 +118,6 @@ async function main() {
 	const config = await promptForMissingValues(
 		args[0],
 		opts.transport,
-		opts.gpt,
 		opts.packageManager,
 	)
 
@@ -140,11 +125,7 @@ async function main() {
 	let repoUrl: string
 	let templatePath: string
 	let betaMessage: string | null = null
-	if (config.isGpt) {
-		repoUrl = GIT_REPOS.gpt.repo
-		templatePath = GIT_REPOS.gpt.path
-		betaMessage = GIT_REPOS.gpt.betaMessage
-	} else if (config.transport === "stdio") {
+	if (config.transport === "stdio") {
 		repoUrl = GIT_REPOS.stdio.repo
 		templatePath = GIT_REPOS.stdio.path
 		betaMessage = GIT_REPOS.stdio.betaMessage

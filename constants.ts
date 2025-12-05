@@ -9,11 +9,6 @@ export const GIT_REPOS = {
 		path: "examples/local-filesystem",
 		betaMessage: null,
 	},
-	gpt: {
-		repo: "https://github.com/smithery-ai/sdk.git",
-		path: "examples/open-ai-hello-server",
-		betaMessage: "⚠ Notice: ChatGPT apps support is currently in beta.",
-	},
 } as const
 
 export const LINKS = {

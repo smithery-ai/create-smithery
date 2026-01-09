@@ -1,11 +1,11 @@
-export const GIT_REPOS = {
+export const TEMPLATES = {
 	http: {
-		repo: "https://github.com/smithery-ai/sdk.git",
+		repo: "https://github.com/smithery-ai/create-smithery.git",
 		path: "examples/basic-server",
 		betaMessage: null,
 	},
 	stdio: {
-		repo: "https://github.com/smithery-ai/sdk.git",
+		repo: "https://github.com/smithery-ai/create-smithery.git",
 		path: "examples/local-filesystem",
 		betaMessage: null,
 	},

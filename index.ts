@@ -5,7 +5,7 @@ import { Command } from "commander"
 import chalk from "chalk"
 import boxen from "boxen"
 import { cloneRepository } from "./utils/git.js"
-import { GIT_REPOS, LINKS } from "./constants.js"
+import { TEMPLATES, LINKS } from "./constants.js"
 import { installPackages } from "./utils/install.js"
 import { load } from "./utils/loader.js"
 import { SMITHERY_ASCII } from "./utils/smithery-ascii.js"
@@ -37,7 +37,7 @@ async function promptForMissingValues(
 	transport?: string,
 	packageManager?: string,
 ): Promise<Config> {
-	const questions: any[] = []
+	const questions: unknown[] = []
 
 	if (!projectName) {
 		questions.push({
@@ -112,7 +112,8 @@ async function promptForMissingValues(
 		})
 	}
 
-	const answers = questions.length > 0 ? await inquirer.prompt(questions) : {}
+	const answers =
+		questions.length > 0 ? await inquirer.prompt(questions as never) : {}
 
 	return {
 		projectName: projectName || answers.projectName,
@@ -129,18 +130,18 @@ async function main() {
 		opts.packageManager,
 	)
 
-	// Determine repo URL based on config
+	// Determine repo URL and template path based on config
 	let repoUrl: string
 	let templatePath: string
 	let betaMessage: string | null = null
 	if (config.transport === "stdio") {
-		repoUrl = GIT_REPOS.stdio.repo
-		templatePath = GIT_REPOS.stdio.path
-		betaMessage = GIT_REPOS.stdio.betaMessage
+		repoUrl = TEMPLATES.stdio.repo
+		templatePath = TEMPLATES.stdio.path
+		betaMessage = TEMPLATES.stdio.betaMessage
 	} else {
-		repoUrl = GIT_REPOS.http.repo
-		templatePath = GIT_REPOS.http.path
-		betaMessage = GIT_REPOS.http.betaMessage
+		repoUrl = TEMPLATES.http.repo
+		templatePath = TEMPLATES.http.path
+		betaMessage = TEMPLATES.http.betaMessage
 	}
 
 	// Clone the repository

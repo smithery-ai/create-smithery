@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest"
-import { GIT_REPOS } from "./constants.js"
+import { TEMPLATES } from "./constants.js"
 
 // Mock inquirer module
 vi.mock("inquirer", () => {
@@ -90,18 +90,18 @@ describe("create-smithery CLI", () => {
 		const testCases = [
 			{
 				transport: "stdio",
-				expectedRepo: GIT_REPOS.stdio.repo,
+				expectedPath: TEMPLATES.stdio.path,
 				description: "STDIO template",
 			},
 			{
 				transport: "http",
-				expectedRepo: GIT_REPOS.http.repo,
+				expectedPath: TEMPLATES.http.path,
 				description: "HTTP template",
 			},
 		]
 
 		for (const testCase of testCases) {
-			it(`should select correct repo for ${testCase.description}`, async () => {
+			it(`should select correct template for ${testCase.description}`, async () => {
 				vi.mocked(cloneRepository).mockResolvedValueOnce({
 					success: true,
 					message: "",
@@ -116,26 +116,22 @@ describe("create-smithery CLI", () => {
 					testCase.transport,
 				)
 
-				// Simulate calling the parts of main that select the repo
-				let repoUrl: string
+				// Simulate calling the parts of main that select the template
+				let templatePath: string
 				if (config.transport === "stdio") {
-					repoUrl = GIT_REPOS.stdio.repo
+					templatePath = TEMPLATES.stdio.path
 				} else {
-					repoUrl = GIT_REPOS.http.repo
+					templatePath = TEMPLATES.http.path
 				}
 
-				expect(repoUrl).toBe(testCase.expectedRepo)
+				expect(templatePath).toBe(testCase.expectedPath)
 			})
 		}
 	})
 
 	describe("config completeness", () => {
 		it("should have all required properties after prompting", async () => {
-			const config = await promptForMissingValues(
-				"my-app",
-				"http",
-				"npm",
-			)
+			const config = await promptForMissingValues("my-app", "http", "npm")
 
 			// Verify all properties exist
 			expect(config).toHaveProperty("projectName")
@@ -145,42 +141,26 @@ describe("create-smithery CLI", () => {
 		})
 
 		it("should have valid projectName", async () => {
-			const config = await promptForMissingValues(
-				"my-app",
-				"http",
-				"npm",
-			)
+			const config = await promptForMissingValues("my-app", "http", "npm")
 
 			expect(typeof config.projectName).toBe("string")
 			expect(config.projectName.length).toBeGreaterThan(0)
 		})
 
 		it("should have valid transport value", async () => {
-			const config = await promptForMissingValues(
-				"my-app",
-				"stdio",
-				"npm",
-			)
+			const config = await promptForMissingValues("my-app", "stdio", "npm")
 
 			expect(["http", "stdio"]).toContain(config.transport)
 		})
 
 		it("should have valid packageManager value", async () => {
-			const config = await promptForMissingValues(
-				"my-app",
-				"http",
-				"bun",
-			)
+			const config = await promptForMissingValues("my-app", "http", "bun")
 
 			expect(["npm", "bun"]).toContain(config.packageManager)
 		})
 
 		it("should have valid betaMessage (null or string)", async () => {
-			const config = await promptForMissingValues(
-				"my-app",
-				"http",
-				"npm",
-			)
+			const config = await promptForMissingValues("my-app", "http", "npm")
 
 			expect(
 				config.betaMessage === null || typeof config.betaMessage === "string",
@@ -245,7 +225,7 @@ describe("create-smithery CLI", () => {
 				success: false,
 				message: "Clone failed",
 				error: new Error("Clone failed"),
-			} as any)
+			} as never)
 
 			const config = await promptForMissingValues("my-app", "http")
 			expect(config.projectName).toBe("my-app")
